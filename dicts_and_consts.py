@@ -20,7 +20,8 @@ sqrt2pi = sqrt(2*pi)
 const = 1/(3*pi**2*hc**2*10) #mb
 
 #create useful dictionaries
-Zdict = {'H' :1,
+Zdict = {'n' :0,
+        'H' :1,
         'He' :2,
         'Li' :3,
         'Be' :4,

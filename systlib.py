@@ -867,7 +867,7 @@ def find_chis_interp(vals, chis, iterations = 2):
     Xmax = (Y-Amax)/Bmax
     return [Xmin,Xmax]
 
-def calc_errors_chis(lst):
+def calc_errors_chis_2sigma(lst):
     
     xx = lst[4].x #all energy or temperature vectors are alike. Pick the 5th, but any would do
     val_matrix = np.zeros((xx.size,6))
@@ -893,6 +893,34 @@ def calc_errors_chis(lst):
             row[:] = [x, best_fit, -best_fit+2*errmin, errmin, errmax, 2*errmax-best_fit]
         else:
             row[:] = [x, np.nan, np.nan, np.nan, np.nan, np.nan]
+        val_matrix[i,:] = row[:]
+    return val_matrix
+
+def calc_errors_chis(lst):
+    xx = lst[4].x #all energy or temperature vectors are alike. Pick the 5th, but any would do
+    val_matrix = np.zeros((xx.size,4))
+    for i, x in enumerate(xx):
+        chis = []
+        vals = []
+        row = np.zeros(4)
+        counterflag = 0
+        for graph in lst:
+            if not np.isnan(graph.y[i]):
+                chis.append(graph.chi2)
+                vals.append(graph.y[i])
+                #it may be that all y[i] are nans. Do a check so that the code only saves data if there actually are values to analyze
+                counterflag += 1
+        if counterflag > 10:
+            index_of_best_fit = np.argwhere(chis==np.min(chis))
+            if len(index_of_best_fit)>1:
+                index_of_best_fit = index_of_best_fit[0,0]
+            else:
+                index_of_best_fit = index_of_best_fit.item()
+            best_fit = vals[index_of_best_fit]
+            errmin, errmax = find_chis_interp(vals,chis)
+            row[:] = [x, best_fit, errmin, errmax]
+        else:
+            row[:] = [x, np.nan, np.nan, np.nan]
         val_matrix[i,:] = row[:]
     return val_matrix
 
