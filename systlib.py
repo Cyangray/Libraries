@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import math
 from readlib import readastro_path
 from convert_talys import gen_nld_table, log_interp1d
-from dicts_and_consts import const, sqrt2pi
+from dicts_and_consts import const, sqrt2pi, k_B
 from utils import Z2Name
 
 def sigma2f(sigma, E_g):
@@ -925,13 +925,12 @@ def calc_errors_chis(lst):
     return val_matrix
 
 def calc_errors_chis_MACS(lst):
-    
-    xx = lst[4].x #all energy or temperature vectors are alike. Pick the 5th, but any would do
-    val_matrix = np.zeros((xx.size,6))
+    xx = lst[4].x*k_B #all energy or temperature vectors are alike. Pick the 5th, but any would do
+    val_matrix = np.zeros((xx.size,4))
     for i, x in enumerate(xx):
         chis = []
         vals = []
-        row = np.zeros(6)
+        row = np.zeros(4)
         counterflag = 0
         for graph in lst:
             if not np.isnan(graph.MACS[i]):
@@ -940,13 +939,15 @@ def calc_errors_chis_MACS(lst):
                 #it may be that all y[i] are nans. Do a check so that the code only saves data if there actually are values to analyze
                 counterflag += 1
         if counterflag > 10:
-            best_fit = vals[np.argwhere(chis==np.min(chis)).item()]
-
+            index_of_best_fit = np.argwhere(chis==np.min(chis))
+            if len(index_of_best_fit)>1:
+                index_of_best_fit = index_of_best_fit[0,0]
+            else:
+                index_of_best_fit = index_of_best_fit.item()
+            best_fit = vals[index_of_best_fit]
             errmin, errmax = find_chis_interp(vals,chis)
-            row[:] = [x, best_fit, -best_fit+2*errmin, errmin, errmax, 2*errmax-best_fit]
+            row[:] = [x, best_fit, errmin, errmax]
         else:
-            row[:] = [x, np.nan, np.nan, np.nan, np.nan, np.nan]
+            row[:] = [x, np.nan, np.nan, np.nan]
         val_matrix[i,:] = row[:]
-
     return val_matrix
-        
