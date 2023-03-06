@@ -60,7 +60,7 @@ def readldmodel(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = 'da
 
 def readldmodel_path(path):
     '''
-    reads the nld model from the output file of TALYS, given its path
+    reads the nld model from the output file of TALYS, given its path.
     '''
     
     max_rows = 55
@@ -91,12 +91,13 @@ def readldmodel_path(path):
         
     return out_matrix2
 
-def readldmodel_legacy(nucleus, A, ldmodel, massmodel, strength, omp, ds_location):
+def readldmodel_legacy(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = 'data/'):
     '''
     reads the nld model from the output file of TALYS.
     '''
-    filepath = findpath(nucleus, A-1, ldmodel, massmodel, strength, omp, ds_location = ds_location) + 'output.txt'
-    return readldmodel_path(filepath)
+    filepath = findpath(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = ds_location) + 'output.txt'
+    table = readldmodel_path(filepath)
+    return np.c_[table[:,0], table[:,3]]
 
 def readastro(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = 'data/'):
     '''

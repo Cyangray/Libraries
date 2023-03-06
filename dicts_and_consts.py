@@ -144,7 +144,8 @@ Zdict = {'n' :0,
 isodict = {v: k for k, v in Zdict.items()}
 
 ompdict = {1 : 'jlmomp-y',
-           2 : 'localomp-n'}
+           2 : 'localomp-n',
+           3 : 'localomp-y'}
            
 def import_stable_nucs():
     stableN = [ 0, 1, 1, 2, 3, 4, 5, 5, 6,

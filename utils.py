@@ -72,3 +72,8 @@ def ZandA2Name(A,Z, invert = False, particle_names = False):
         return Zstr + Astr
     else:
         return Astr + Zstr
+    
+def lin_interp(x1,y1,x2,y2,x0):
+    a = (y2-y1)/(x2-x1)
+    b = y2 - a*x2
+    return a*x0 + b

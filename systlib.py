@@ -447,6 +447,12 @@ def import_Bnorm(path):
     arr = np.loadtxt(path, skiprows = 3)
     return arr.item()
     
+def import_T(path):
+    #string = np.genfromtxt(path, skip_header=4,)
+    string = np.loadtxt(path,skiprows = 4,max_rows=1)
+    T = string[1]
+    return T
+
 def rho2D(rho, target_spin, spin_cutoff):
     '''
     calculate D from rho at Bn (Larsen et al. 2011, eq. (20))
@@ -563,12 +569,14 @@ def make_E1_M1_files_core(gsf, A, Z, M1, target_folder, high_energy_interp):
 
 
 
-def make_E1_M1_files_simple(energies, values, A, Z, M1 = 0.1, target_folder = None, high_energy_interp=None):
+def make_E1_M1_files_simple(energies, values, A, Z, M1 = 0.1, target_folder = None, high_energy_interp=None, delete_points = None):
     '''
     Function that takes the energies and the values of gsf and writes two tables 
     for both E1 and M1 ready to be taken as input by TALYS.
     '''
     gsf = np.c_[energies,values]
+    if delete_points is not None:
+        gsf = np.delete(gsf, delete_points, 0)
     return make_E1_M1_files_core(gsf, A, Z, M1, target_folder, high_energy_interp)
 
 def make_E1_M1_files(gsf_folder_path, A, Z, a0, a1, M1 = 0.1, filename = 'strength.nrm', target_folder = None, high_energy_interp=None, delete_points = None):
