@@ -249,7 +249,24 @@ class gsf:
                 plt.errorbar(self.energies, self.y, yerr = self.yerrplot, **kwargs)
             else:
                 plt.plot(self.energies, self.y, **kwargs)
+
+class xs(gsf):
+    def __init__(self, path, A, Z, level = None):
         
+        A_string = '0'*(3-len(str(A))) + str(A)
+        Z_string = '0'*(3-len(str(Z))) + str(Z)
+        if level == None:
+            extension = 'tot'
+        else:
+            extension = 'L' + '0'*(2-len(str(level))) + str(level)
+            
+        name = 'rp' + Z_string + A_string + '.' + extension
+        
+        gsf.__init__(self,path = path + name, is_sigma = False)
+        self.A = A
+        self.Z = Z
+        self.level = level
+
 class nld:
     '''
     Class for reading level densities
@@ -904,7 +921,7 @@ def calc_errors_chis_2sigma(lst):
         val_matrix[i,:] = row[:]
     return val_matrix
 
-def calc_errors_chis(lst):
+def calc_errors_chis(lst, graphic_function = find_chis):
     xx = lst[4].x #all energy or temperature vectors are alike. Pick the 5th, but any would do
     val_matrix = np.zeros((xx.size,4))
     for i, x in enumerate(xx):
@@ -925,14 +942,14 @@ def calc_errors_chis(lst):
             else:
                 index_of_best_fit = index_of_best_fit.item()
             best_fit = vals[index_of_best_fit]
-            errmin, errmax = find_chis_interp(vals,chis)
+            errmin, errmax = graphic_function(vals,chis)
             row[:] = [x, best_fit, errmin, errmax]
         else:
             row[:] = [x, np.nan, np.nan, np.nan]
         val_matrix[i,:] = row[:]
     return val_matrix
 
-def calc_errors_chis_MACS(lst):
+def calc_errors_chis_MACS(lst, graphic_function = find_chis_interp):
     xx = lst[4].x*k_B #all energy or temperature vectors are alike. Pick the 5th, but any would do
     val_matrix = np.zeros((xx.size,4))
     for i, x in enumerate(xx):

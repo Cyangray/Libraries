@@ -10,7 +10,7 @@ quantities
 """
 
 import numpy as np
-from dicts_and_consts import k_B, c_vacuum, N_A, ompdict
+from dicts_and_consts import k_B, c_vacuum, N_A, ompdict, import_T9
 from utils import Z2Name, Name2Z, Name2ZandA, search_string_in_file
 import sklearn.linear_model as lm
 
@@ -48,14 +48,18 @@ def readstrength_legacy(nucleus, A, ldmodel, massmodel, strength, omp, ds_locati
     filepath = findpath(nucleus, A-1, ldmodel, massmodel, strength, omp, ds_location) + 'output.txt'
     return readstrength_path(filepath)
 
+def readxs_path(path):
+    #read the cross section from the output file
+    return np.loadtxt(path, skiprows = 5)
+
 def readldmodel_table(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = 'data/'):
-    #read the strength function from the gsf.txt mashup file
+    #read the level density from the nld_table.txt mashup file
     filepath = find_isotope_path(nucleus, A, ds_location) + 'nld_table.txt'
     rowsskip = 57* ( ((ldmodel-1)*3*8*2) + ((massmodel-1)*8*2) + ((strength-1)*2) + ((omp-1)) )
     return np.loadtxt(filepath, skiprows = (rowsskip + 2), max_rows = 55)
 
 def readldmodel(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = 'data/'):
-    table = readldmodel_table(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = 'data/')
+    table = readldmodel_table(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = ds_location)
     return np.c_[table[:,0], table[:,3]]
 
 def readldmodel_path(path):
@@ -118,13 +122,25 @@ def read_Qvalue(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = 'da
     if dtype == 'str':
         line = np.genfromtxt(filepath, skip_header = (rowsskip + 33), max_rows = 1, dtype = 'float')
         #print(line)
-        if line >= 0.:
-            return ' %11.5e'%line
+        if line[0] >= 0.:
+            return ' %11.5e'%line[0]
         else:
-            return '%12.5e'%line
+            return '%12.5e'%line[0]
     else:
-        Qvalue = np.loadtxt(filepath, skiprows = (rowsskip + 33), max_rows = 1)
+        line = np.loadtxt(filepath, skiprows = (rowsskip + 33), max_rows = 1)
+        Qvalue = line[0]
         return Qvalue
+
+def read_DZ(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = 'data/'):
+    '''
+    read if the rate is calculated using the DZ mass model, from the ncrates.txt file
+    returns 0 if not, 1 if yes
+    '''
+    filepath = find_isotope_path(nucleus, A, ds_location) + 'ncrates.txt' 
+    rowsskip = 34* ( ((ldmodel-1)*3*8*2) + ((massmodel-1)*8*2) + ((strength-1)*2) + ((omp-1)) )
+    line = np.loadtxt(filepath, skiprows = (rowsskip + 33), max_rows = 1)
+    DZ = line[1]
+    return int(DZ)
 
 def readastro_path(path):
     '''
@@ -134,7 +150,7 @@ def readastro_path(path):
     ncrates = np.loadtxt(filepath)
     return np.delete(ncrates, [0,1,2,3], 0) #delete first four rows
 
-def readastro_legacy(nucleus, A, ldmodel, massmodel, strength, omp, ds_location):
+def readastro_legacy(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = 'data/'):
     filepath = findpath(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = ds_location) + 'astrorate.g'
     return readastro_path(filepath)
 
@@ -168,6 +184,7 @@ def DZcalc(nucleus, A, ldmodel, massmodel, strength, omp, ds_location = 'data/')
     #Find out if the astrorate uses the DZ massformula
     #NB: outdated! new file system doesn't have info on DZ. See if you can retrieve the information from the tar file, and maybe save it in a DZ file?
     filepath = findpath(nucleus, A, ldmodel, massmodel, strength, omp, ds_location) + 'output.txt'
+    
     Aname = (3 - len(str(A)))*' ' + str(A)
     string = "TALYS-warning: Duflo-Zuker mass for " + Z2Name(nucleus) + Aname
     with open(filepath, 'r') as read_obj:
@@ -389,7 +406,7 @@ def xs2rate(energies,xss,target_mass_in_au,Ts=None, lower_Elim = 0.1):
     mn = 1.008664915
     red_mass = (m1*mn)/(m1 + mn) * 931494.10242/(c_vacuum*100)**2 #keV s^2/cm^2
     if Ts is None:
-        T9extrange = np.array([0.01, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
+        T9extrange = import_T9(extended = True)
     else:
         T9extrange = Ts
     rate = []
@@ -419,7 +436,7 @@ def xs2MACS(energies,xss,Ts=None,lower_Elim = 0.1):
     '''
     
     if Ts is None:
-        T9extrange = np.array([0.01, 0.05, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
+        T9extrange = import_T9(extended = True)
     else:
         T9extrange = Ts
     MACS = []

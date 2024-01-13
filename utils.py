@@ -77,3 +77,33 @@ def lin_interp(x1,y1,x2,y2,x0):
     a = (y2-y1)/(x2-x1)
     b = y2 - a*x2
     return a*x0 + b
+
+def find_lower_upperline(chains):
+    lowerline = chains[0].copy()
+    upperline = chains[0].copy()
+
+    for chain in chains:
+        for l in range(len(chain)):
+            if chain[l] > upperline[l]:
+                upperline[l] = chain[l]
+            if chain[l] < lowerline[l]:
+                lowerline[l] = chain[l]
+    return lowerline, upperline
+
+def ToLatex(nucname):
+    '''
+    function translating a string of the form 'NNNXX' indicating the
+    name of a nucleus, into something like '$^{NNN}$XX' for LaTeX rendering
+    '''
+    nums = ''
+    letters = ''
+    for char in nucname:
+        if char.isnumeric():
+            nums += char
+        else:
+            letters += char
+    newstring = '$^{' + nums + '}$' + letters
+    return newstring    
+
+def ZandA2NameLatex(A,Z):
+    return ToLatex(ZandA2Name(A,Z, invert = False, particle_names = False))

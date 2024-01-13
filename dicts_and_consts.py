@@ -10,6 +10,7 @@ Dictionaries for most of the other libraries
 
 #constants
 from numpy import sqrt, pi
+import numpy as np
 k_B = 8.617333262145e1 #Boltzmann konstant, keV*GK^-1
 c_vacuum = 299792458 #speed of light in vacuum, m/s
 N_A = 6.02214076e23 #Avogadro's number
@@ -185,3 +186,8 @@ def import_stable_nucs():
     
     return stableZ, stableN
 
+def import_T9(extended = False):
+    if extended:
+        return np.array([0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
+    else:
+        return np.array([0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
